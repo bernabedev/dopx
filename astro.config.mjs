@@ -4,8 +4,8 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 
+import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
-import vercel from '@astrojs/vercel';
 import { loadEnv } from "vite";
 const { WEB_URL } = loadEnv(process.env.NODE_ENV ?? '', process.cwd(), "");
 
@@ -19,7 +19,9 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  adapter: vercel(),
+  adapter: node({
+    mode: 'standalone',
+  }),
 
   integrations: [sitemap()],
 

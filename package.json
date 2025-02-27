@@ -10,8 +10,8 @@
     "start": "astro preview"
   },
   "dependencies": {
+    "@astrojs/node": "^9.1.2",
     "@astrojs/sitemap": "^3.2.1",
-    "@astrojs/vercel": "^8.1.0",
     "@playwright/test": "^1.50.1",
     "@tailwindcss/vite": "^4.0.9",
     "astro": "^5.4.0",
