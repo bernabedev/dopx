@@ -1,11 +1,308 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import type { CurrentRateResponse, HistoryRateResponse } from '../definitios'
+import Layout from '../layouts/Layout.astro'
+import { formatDate } from '../lib/utils'
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const WEB_URL = import.meta.env.WEB_URL
+
+const fetchCurrentRate = async (): Promise<CurrentRateResponse> => {
+  const response = await fetch(`${WEB_URL}/api/exchange-rate`)
+  return await response.json()
+}
+
+const fetchHistoryRate = async (): Promise<HistoryRateResponse> => {
+  const response = await fetch(`${WEB_URL}/api/history-rate`)
+  return await response.json()
+}
+const currentRateResponse = await fetchCurrentRate()
+const historyRateResponse = await fetchHistoryRate()
+
+const currentRate = currentRateResponse.data.result
+const historyItems = historyRateResponse.data.result.items.reverse()
 ---
 
-<Layout>
-	<Welcome />
+<Layout title='USD ↔ DOP | Tasa de Cambio'>
+  <main class='mx-auto max-w-5xl px-4 py-8'>
+    <!-- Sección de Conversión -->
+    <section class='mb-8 rounded-lg bg-white p-6 shadow-md'>
+      <h2 class='mb-4 text-xl font-semibold text-gray-800'>
+        Conversión de Divisas
+      </h2>
+
+      <div class='grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr]'>
+        <div>
+          <div class='mb-2 flex items-center'>
+            <label for='amount' class='block text-sm font-medium text-gray-700'
+              >Cantidad</label
+            >
+          </div>
+          <input
+            type='number'
+            id='amount'
+            class='block h-12 w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+            value='1'
+            min='0'
+          />
+        </div>
+
+        <div class='flex items-center justify-center md:justify-end'>
+          <div class='relative flex items-end'>
+            <div id='from-currency-container'>
+              <div class='mb-2 flex items-center'>
+                <label class='block text-sm font-medium text-gray-700'>De</label
+                >
+              </div>
+              <select
+                id='from-currency'
+                class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+              >
+                <option value='USD' selected>USD - Dólar</option>
+                <option value='DOP'>DOP - Peso Dominicano</option>
+              </select>
+            </div>
+
+            <button
+              id='swap-btn'
+              class='mx-2 size-12 shrink rounded-full p-2'
+              aria-label='Invertir conversión'
+            >
+              <i class='fas fa-exchange-alt text-gray-600'></i>
+            </button>
+
+            <div id='to-currency-container'>
+              <div class='mb-2 flex items-center'>
+                <label class='block text-sm font-medium text-gray-700'>A</label>
+              </div>
+              <select
+                id='to-currency'
+                class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+              >
+                <option value='USD'>USD - Dólar</option>
+                <option value='DOP' selected>DOP - Peso Dominicano</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class='mt-6 rounded-lg bg-gray-50 p-4'>
+        <div class='flex items-center justify-between'>
+          <div>
+            <p class='text-sm text-gray-500'>Resultado</p>
+            <p class='text-2xl font-bold text-gray-900' id='conversion-result'>
+              62.53 DOP
+            </p>
+          </div>
+          <div>
+            <p class='text-sm text-gray-500'>Tasa actual</p>
+            <div class='flex flex-col'>
+              <span class='text-sm font-medium' id='purchase-rate'
+                >Compra: 62.11 DOP</span
+              >
+              <span class='text-sm font-medium' id='selling-rate'
+                >Venta: 62.53 DOP</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Historial -->
+    <section class='rounded-lg bg-white p-6 shadow-md'>
+      <div class='mb-6 flex items-center justify-between'>
+        <h2 class='text-xl font-semibold text-gray-800'>Historial de Tasas</h2>
+        <div>
+          <select
+            id='history-period'
+            class='rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+          >
+            <option value='7'>Últimos 7 días</option>
+            <option value='30'>Últimos 30 días</option>
+            <option value='90'>Últimos 90 días</option>
+          </select>
+        </div>
+      </div>
+
+      <div class='max-h-96 overflow-x-auto'>
+        <table class='min-w-full divide-y divide-gray-200'>
+          <thead class='bg-gray-50'>
+            <tr>
+              <th
+                scope='col'
+                class='px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase'
+              >
+                Fecha
+              </th>
+              <th
+                scope='col'
+                class='px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase'
+              >
+                Compra
+              </th>
+              <th
+                scope='col'
+                class='px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase'
+              >
+                Venta
+              </th>
+              <th
+                scope='col'
+                class='px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase'
+              >
+                Var. Acum.
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            id='history-table-body'
+            class='divide-y divide-gray-200 bg-white'
+          >
+            <!-- Datos serán insertados dinámicamente por JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class='mt-6'>
+        <canvas id='chart-container' class='h-64'></canvas>
+      </div>
+    </section>
+  </main>
+  <div data-rate={JSON.stringify({ currentRate, historyItems })} hidden></div>
 </Layout>
+
+<script src='https://cdn.jsdelivr.net/npm/chart.js' is:inline></script>
+<script>
+  import type { HistoryItem } from '../definitios.d'
+  import { updateChart } from '../lib/chart'
+  import { formatDate, formatNumber } from '../lib/utils'
+  const dataRate = JSON.parse(
+    (document.querySelector('[data-rate]') as HTMLElement).dataset.rate!
+  )
+
+  // Datos actuales
+  const currentData = dataRate.currentRate
+  // Datos históricos (ejemplo)
+  let historicalData = dataRate.historyItems as HistoryItem[]
+
+  const $amount = document.getElementById('amount') as HTMLInputElement
+  const $fromCurrency = document.getElementById(
+    'from-currency'
+  ) as HTMLSelectElement
+  const $toCurrency = document.getElementById(
+    'to-currency'
+  ) as HTMLSelectElement
+  const $conversionResult = document.getElementById(
+    'conversion-result'
+  ) as HTMLSpanElement
+  const $swapBtn = document.getElementById('swap-btn') as HTMLButtonElement
+  const $historyTableBody = document.getElementById(
+    'history-table-body'
+  ) as HTMLTableSectionElement
+  const $historyPeriod = document.getElementById(
+    'history-period'
+  ) as HTMLSelectElement
+  const $chartContainer = document.getElementById(
+    'chart-container'
+  ) as HTMLCanvasElement
+
+  // Manejar la conversión
+  function updateConversion() {
+    const amount = parseFloat($amount.value) || 0
+    const fromCurrency = $fromCurrency.value
+    const toCurrency = $toCurrency.value
+
+    let result = 0
+    if (fromCurrency === 'USD' && toCurrency === 'DOP') {
+      result = amount * currentData.actualSellingValue
+    } else if (fromCurrency === 'DOP' && toCurrency === 'USD') {
+      result = amount / currentData.actualPurchaseValue
+    } else {
+      result = amount
+    }
+
+    $conversionResult.textContent = `${formatNumber(result)} ${toCurrency}`
+  }
+
+  // Inicializar la conversión
+  updateConversion()
+
+  // Event listeners para los campos de conversión
+  $amount.addEventListener('input', updateConversion)
+  $fromCurrency.addEventListener('change', updateConversion)
+  $toCurrency.addEventListener('change', updateConversion)
+
+  // Event listener para el botón de invertir conversión
+  $swapBtn.addEventListener('click', function () {
+    const tempValue = $fromCurrency.value
+    $fromCurrency.value = $toCurrency.value
+    $toCurrency.value = tempValue
+
+    updateConversion()
+  })
+
+  // Función para actualizar la tabla de historial
+  function updateHistoryTable() {
+    $historyTableBody.innerHTML = ''
+
+    historicalData.forEach((item) => {
+      const row = document.createElement('tr')
+
+      const dateCell = document.createElement('td')
+      dateCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+      dateCell.textContent = formatDate(item.date)
+
+      const purchaseCell = document.createElement('td')
+      purchaseCell.className =
+        'px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+      purchaseCell.textContent = formatNumber(item.purchaseValue)
+
+      const sellingCell = document.createElement('td')
+      sellingCell.className =
+        'px-6 py-4 whitespace-nowrap text-sm text-gray-900'
+      sellingCell.textContent = formatNumber(item.sellingValue)
+
+      const varCell = document.createElement('td')
+      varCell.className = 'px-6 py-4 whitespace-nowrap text-sm'
+      const varValue = item.purchaseAccumulatedValue
+      varCell.textContent = `${formatNumber(varValue)}%`
+      varCell.classList.add(varValue < 0 ? 'text-red-600' : 'text-green-600')
+
+      row.appendChild(dateCell)
+      row.appendChild(purchaseCell)
+      row.appendChild(sellingCell)
+      row.appendChild(varCell)
+
+      $historyTableBody.appendChild(row)
+    })
+  }
+
+  // Inicializar la tabla de historial
+  updateHistoryTable()
+
+  // Simulación de carga de datos históricos según el período seleccionado
+  $historyPeriod.addEventListener('change', function () {
+    // Aquí se haría una llamada API para obtener los datos según el período seleccionado
+    console.log(`Cargando datos para los últimos ${this.value} días`)
+
+    // Para fines de demo, solo actualizamos la tabla con los datos existentes
+    updateHistoryTable()
+    updateChart($chartContainer, historicalData)
+  })
+
+  // Inicializar el gráfico
+  let rateChart
+
+  // Inicializar el gráfico
+  updateChart($chartContainer, historicalData)
+
+  // Simular la obtención de datos en tiempo real (cada 5 minutos)
+  function fetchRealTimeData() {
+    console.log('Actualizando datos en tiempo real...')
+    // Aquí se haría una llamada API para obtener los últimos datos
+    setTimeout(fetchRealTimeData, 300000) // 5 minutos
+  }
+
+  // Iniciar la actualización periódica
+  fetchRealTimeData()
+</script>
