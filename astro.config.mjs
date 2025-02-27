@@ -3,11 +3,9 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import node from '@astrojs/node';
 
 import sitemap from '@astrojs/sitemap';
-import { loadEnv } from "vite";
-const { PORT } = loadEnv(process.env.NODE_ENV ?? '', process.cwd(), "");
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,13 +15,8 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  adapter: node({
-    mode: 'standalone'
-  }),
+  adapter: vercel(),
 
   integrations: [sitemap()],
 
-  server: {
-    port: PORT ? +PORT : 4321
-  }
 });
