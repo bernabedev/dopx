@@ -1,7 +1,6 @@
 ---
 import type { CurrentRateResponse, HistoryRateResponse } from '../definitios'
 import Layout from '../layouts/Layout.astro'
-import { formatDate } from '../lib/utils'
 
 const WEB_URL = import.meta.env.WEB_URL
 
@@ -31,7 +30,7 @@ const historyItems = historyRateResponse.data.result.items.reverse()
 
       <div class='grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr]'>
         <div>
-          <div class='mb-2 flex items-center'>
+          <div class='mb-0.5 flex items-center'>
             <label for='amount' class='block text-sm font-medium text-gray-700'
               >Cantidad</label
             >
@@ -46,9 +45,9 @@ const historyItems = historyRateResponse.data.result.items.reverse()
         </div>
 
         <div class='flex items-center justify-center md:justify-end'>
-          <div class='relative flex items-end'>
+          <div class='flex items-end'>
             <div id='from-currency-container'>
-              <div class='mb-2 flex items-center'>
+              <div class='mb-0.5 flex items-center'>
                 <label class='block text-sm font-medium text-gray-700'>De</label
                 >
               </div>
@@ -66,11 +65,24 @@ const historyItems = historyRateResponse.data.result.items.reverse()
               class='mx-2 size-12 shrink rounded-full p-2'
               aria-label='Invertir conversión'
             >
-              <i class='fas fa-exchange-alt text-gray-600'></i>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                stroke-width='2'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                ><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path
+                  d='M7 10h14l-4 -4'></path><path d='M17 14h-14l4 4'
+                ></path></svg
+              >
             </button>
 
             <div id='to-currency-container'>
-              <div class='mb-2 flex items-center'>
+              <div class='mb-0.5 flex items-center'>
                 <label class='block text-sm font-medium text-gray-700'>A</label>
               </div>
               <select
