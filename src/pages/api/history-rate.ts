@@ -27,6 +27,20 @@ export const GET: APIRoute = async () => {
     )
 
     const response = await page.evaluate(async () => {
+      // Get current date
+      const today = new Date()
+
+      // Set lastYear to exactly 12 months ago
+      const lastYear = new Date(today)
+      lastYear.setFullYear(today.getFullYear() - 1)
+
+      console.log({ lastYear: lastYear.toISOString() })
+      // Create FormData object
+      const formData = new FormData()
+      formData.append('fromDate', lastYear.toISOString())
+      formData.append('toDate', today.toISOString())
+      formData.append('isForReporting', 'false') // Ensure value is a string
+
       const res = await fetch(
         'https://www.bancentral.gov.do/Home/GetHistoricalExchangeRates',
         {
@@ -35,7 +49,9 @@ export const GET: APIRoute = async () => {
             'User-Agent': navigator.userAgent,
             Accept: 'application/json, text/plain, */*',
             Referer: 'https://www.bancentral.gov.do/'
-          }
+            // Do NOT set 'Content-Type': 'application/json', as FormData sets its own headers.
+          },
+          body: formData
         }
       )
       return res.text()
@@ -53,7 +69,7 @@ export const GET: APIRoute = async () => {
       headers: { 'Content-Type': 'application/json' }
     })
   } catch (error) {
-    console.error('Error al obtener la tasa de cambio:', error)
+    console.error('Error al obtener los datos:', error)
     return new Response(
       JSON.stringify({ success: false, error: (error as Error).message }),
       {

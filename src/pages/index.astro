@@ -2,7 +2,7 @@
 import type { CurrentRateResponse, HistoryRateResponse } from '../definitios'
 import Layout from '../layouts/Layout.astro'
 
-const WEB_URL = import.meta.env.WEB_URL
+const WEB_URL = import.meta.env.WEB_URL ?? process.env.WEB_URL
 
 const fetchCurrentRate = async (): Promise<CurrentRateResponse> => {
   const response = await fetch(`${WEB_URL}/api/exchange-rate`)
@@ -38,61 +38,57 @@ const historyItems = historyRateResponse.data.result.items.reverse()
           <input
             type='number'
             id='amount'
-            class='block h-12 w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+            class='block h-[46px] w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
             value='1'
             min='0'
           />
         </div>
 
-        <div class='flex items-center justify-center md:justify-end'>
-          <div class='flex items-end'>
-            <div id='from-currency-container'>
-              <div class='mb-0.5 flex items-center'>
-                <label class='block text-sm font-medium text-gray-700'>De</label
-                >
-              </div>
-              <select
-                id='from-currency'
-                class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
-              >
-                <option value='USD' selected>USD - Dólar</option>
-                <option value='DOP'>DOP - Peso Dominicano</option>
-              </select>
+        <div class='flex items-end'>
+          <div id='from-currency-container' class='w-full'>
+            <div class='mb-0.5 flex items-center'>
+              <label class='block text-sm font-medium text-gray-700'>De</label>
             </div>
-
-            <button
-              id='swap-btn'
-              class='mx-2 size-12 shrink rounded-full p-2'
-              aria-label='Invertir conversión'
+            <select
+              id='from-currency'
+              class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='24'
-                height='24'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                stroke-width='2'
-                stroke-linecap='round'
-                stroke-linejoin='round'
-                ><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path
-                  d='M7 10h14l-4 -4'></path><path d='M17 14h-14l4 4'
-                ></path></svg
-              >
-            </button>
+              <option value='USD' selected>USD - Dólar</option>
+              <option value='DOP'>DOP - Peso Dominicano</option>
+            </select>
+          </div>
 
-            <div id='to-currency-container'>
-              <div class='mb-0.5 flex items-center'>
-                <label class='block text-sm font-medium text-gray-700'>A</label>
-              </div>
-              <select
-                id='to-currency'
-                class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
-              >
-                <option value='USD'>USD - Dólar</option>
-                <option value='DOP' selected>DOP - Peso Dominicano</option>
-              </select>
+          <button
+            id='swap-btn'
+            class='mx-2 size-12 shrink rounded-full p-2'
+            aria-label='Invertir conversión'
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              stroke-width='2'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              ><path stroke='none' d='M0 0h24v24H0z' fill='none'></path><path
+                d='M7 10h14l-4 -4'></path><path d='M17 14h-14l4 4'></path></svg
+            >
+          </button>
+
+          <div id='to-currency-container' class='w-full'>
+            <div class='mb-0.5 flex items-center'>
+              <label class='block text-sm font-medium text-gray-700'>A</label>
             </div>
+            <select
+              id='to-currency'
+              class='block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
+            >
+              <option value='USD'>USD - Dólar</option>
+              <option value='DOP' selected>DOP - Peso Dominicano</option>
+            </select>
           </div>
         </div>
       </div>
