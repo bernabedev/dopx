@@ -28,11 +28,7 @@ services:
       retries: 3
       start_period: 10s
     volumes:
-      # Optional: Mount for persistent data if needed
       - ./data:/app/data
-      # Optional: For development, you can mount source code
-      # - ./src:/app/src
-
 networks:
   default:
     name: astro-network
