@@ -105,10 +105,10 @@ const historyItems = historyRateResponse.data.result.items.reverse()
             <p class='text-sm text-gray-500'>Tasa actual</p>
             <div class='flex flex-col'>
               <span class='text-sm font-medium' id='purchase-rate'
-                >Compra: 62.11 DOP</span
+                >Compra: {currentRate.actualPurchaseValue.toFixed(3)} DOP</span
               >
               <span class='text-sm font-medium' id='selling-rate'
-                >Venta: 62.53 DOP</span
+                >Venta: {currentRate.actualSellingValue.toFixed(3)} DOP</span
               >
             </div>
           </div>
