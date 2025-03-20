@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  astro-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: astro-bun-app
+    ports:
+      - '4321:4321'
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4321
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:4321/'
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      # Optional: Mount for persistent data if needed
+      - ./data:/app/data
+      # Optional: For development, you can mount source code
+      # - ./src:/app/src
+
+networks:
+  default:
+    name: astro-network
+    driver: bridge
