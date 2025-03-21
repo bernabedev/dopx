@@ -37,10 +37,14 @@ WORKDIR /app
 # Copy from builder stage
 COPY --from=builder /app/ ./
 
-# Create script for API calls
+# Create script for API calls with status code output only
 RUN echo '#!/bin/bash\n\
-curl -X GET http://localhost:4321/api/exchange-rate\n\
-curl -X GET http://localhost:4321/api/history-rate\n'\
+echo -n "exchange-rate API status: "\n\
+curl -s -o /dev/null -w "%{http_code}" -X GET http://localhost:4321/api/exchange-rate\n\
+echo \n\
+echo -n "history-rate API status: "\n\
+curl -s -o /dev/null -w "%{http_code}" -X GET http://localhost:4321/api/history-rate\n\
+echo\n'\
 > /app/update-rates.sh && chmod +x /app/update-rates.sh
 
 # Set up cron job
@@ -67,8 +71,12 @@ bun run start --host 0.0.0.0 & \n\
 echo "Waiting for application to start..."\n\
 sleep 10\n\
 echo "Calling initial APIs..."\n\
-curl -X GET http://localhost:4321/api/exchange-rate\n\
-curl -X GET http://localhost:4321/api/history-rate\n\
+echo -n "exchange-rate API status: "\n\
+curl -s -o /dev/null -w "%{http_code}" -X GET http://localhost:4321/api/exchange-rate\n\
+echo \n\
+echo -n "history-rate API status: "\n\
+curl -s -o /dev/null -w "%{http_code}" -X GET http://localhost:4321/api/history-rate\n\
+echo \n\
 # Keep the container running with the main process\n\
 wait\n'\
 > /app/start.sh && chmod +x /app/start.sh
