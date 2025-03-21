@@ -155,7 +155,7 @@ const historyItems = historyRateResponse.data.result.items.reverse()
         class='max-h-96 overflow-x-auto rounded-lg border border-slate-100 bg-white dark:border-white/5 dark:bg-slate-900'
       >
         <table class='min-w-full divide-y divide-gray-200 dark:divide-white/5'>
-          <thead class='bg-gray-50 dark:bg-slate-950/50'>
+          <thead class='sticky top-0 bg-gray-50 dark:bg-[#0b1120]'>
             <tr>
               <th
                 scope='col'
@@ -271,10 +271,12 @@ const historyItems = historyRateResponse.data.result.items.reverse()
   })
 
   // Función para actualizar la tabla de historial
-  function updateHistoryTable() {
+  function updateHistoryTable(days: number) {
     $historyTableBody.innerHTML = ''
 
-    historicalData.forEach((item) => {
+    const lastDays = historicalData.slice(-days)
+
+    lastDays.forEach((item) => {
       const row = document.createElement('tr')
 
       const dateCell = document.createElement('td')
@@ -305,34 +307,15 @@ const historyItems = historyRateResponse.data.result.items.reverse()
 
       $historyTableBody.appendChild(row)
     })
+
+    updateChart($chartContainer, lastDays)
   }
 
   // Inicializar la tabla de historial
-  updateHistoryTable()
+  updateHistoryTable(7)
 
   // Simulación de carga de datos históricos según el período seleccionado
   $historyPeriod.addEventListener('change', function () {
-    // Aquí se haría una llamada API para obtener los datos según el período seleccionado
-    console.log(`Cargando datos para los últimos ${this.value} días`)
-
-    // Para fines de demo, solo actualizamos la tabla con los datos existentes
-    updateHistoryTable()
-    updateChart($chartContainer, historicalData)
+    updateHistoryTable(parseInt(this.value))
   })
-
-  // Inicializar el gráfico
-  let rateChart
-
-  // Inicializar el gráfico
-  updateChart($chartContainer, historicalData)
-
-  // Simular la obtención de datos en tiempo real (cada 5 minutos)
-  function fetchRealTimeData() {
-    console.log('Actualizando datos en tiempo real...')
-    // Aquí se haría una llamada API para obtener los últimos datos
-    setTimeout(fetchRealTimeData, 300000) // 5 minutos
-  }
-
-  // Iniciar la actualización periódica
-  fetchRealTimeData()
 </script>
