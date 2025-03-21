@@ -12,6 +12,12 @@ services:
       - PORT=4321
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - WEB_URL=${WEB_URL}
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.${HASH}.rule=Host(`${DOPX_HOST}`)'
+      - 'traefik.http.routers.${HASH}.entrypoints=websecure'
+      - 'traefik.http.routers.${HASH}.tls.certResolver=letsencrypt'
+      - 'traefik.http.services.${HASH}.loadbalancer.server.port=${DOPX_PORT}'
     restart: unless-stopped
     healthcheck:
       test:
