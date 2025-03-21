@@ -19,9 +19,11 @@ RUN bun run build
 # Create runtime image
 FROM oven/bun:latest
 
-# Install only essential certificates
+# Install only essential certificates and cron
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    cron \
+    curl \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -33,10 +35,19 @@ RUN bunx playwright install webkit
 WORKDIR /app
 
 # Copy from builder stage
-COPY  --from=builder /app/ ./
-# COPY --from=builder /app/dist ./dist
-# COPY --from=builder /app/node_modules ./node_modules
-# COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/ ./
+
+# Create script for API calls
+RUN echo '#!/bin/bash\n\
+curl -X GET http://localhost:4321/api/exchange-rate\n\
+curl -X GET http://localhost:4321/api/history-rate\n'\
+> /app/update-rates.sh && chmod +x /app/update-rates.sh
+
+# Set up cron job
+RUN echo "10 0 * * * /app/update-rates.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/update-rates-cron \
+    && chmod 0644 /etc/cron.d/update-rates-cron \
+    && crontab /etc/cron.d/update-rates-cron \
+    && touch /var/log/cron.log
 
 # Set environment variables
 ENV HOST=0.0.0.0
@@ -47,5 +58,11 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 # Expose the application port
 EXPOSE 4321
 
-# Command to run the application
-CMD ["bun", "run", "start", "--host", "0.0.0.0"]
+# Create startup script that runs both the app and cron
+RUN echo '#!/bin/bash\n\
+service cron start\n\
+bun run start --host 0.0.0.0\n'\
+> /app/start.sh && chmod +x /app/start.sh
+
+# Command to run the application and cron
+CMD ["/app/start.sh"]
