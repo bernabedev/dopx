@@ -58,10 +58,19 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 # Expose the application port
 EXPOSE 4321
 
-# Create startup script that runs both the app and cron
+# Create startup script that runs both the app and cron, and calls APIs at startup
 RUN echo '#!/bin/bash\n\
 service cron start\n\
-bun run start --host 0.0.0.0\n'\
+echo "Starting the application..."\n\
+bun run start --host 0.0.0.0 & \n\
+# Wait for the application to start before calling APIs\n\
+echo "Waiting for application to start..."\n\
+sleep 10\n\
+echo "Calling initial APIs..."\n\
+curl -X GET http://localhost:4321/api/exchange-rate\n\
+curl -X GET http://localhost:4321/api/history-rate\n\
+# Keep the container running with the main process\n\
+wait\n'\
 > /app/start.sh && chmod +x /app/start.sh
 
 # Command to run the application and cron
