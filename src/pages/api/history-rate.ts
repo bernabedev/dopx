@@ -34,7 +34,6 @@ export const GET: APIRoute = async () => {
       const lastYear = new Date(today)
       lastYear.setFullYear(today.getFullYear() - 1)
 
-      console.log({ lastYear: lastYear.toISOString() })
       // Create FormData object
       const formData = new FormData()
       formData.append('fromDate', lastYear.toISOString())
@@ -49,7 +48,6 @@ export const GET: APIRoute = async () => {
             'User-Agent': navigator.userAgent,
             Accept: 'application/json, text/plain, */*',
             Referer: 'https://www.bancentral.gov.do/'
-            // Do NOT set 'Content-Type': 'application/json', as FormData sets its own headers.
           },
           body: formData
         }
