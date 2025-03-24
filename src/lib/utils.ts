@@ -7,6 +7,16 @@ export function formatDate(dateString: string) {
   })
 }
 
+export function formatLongDate(dateString: string) {
+  const date = new Date(dateString)
+
+  const day = date.getUTCDate()
+  const month = date.toLocaleString('es-ES', { month: 'long', timeZone: 'UTC' })
+  const year = date.getUTCFullYear()
+
+  return `${day} de ${month} de ${year}`
+}
+
 export function formatNumber(num: string | number, locale = 'DOP') {
   return new Intl.NumberFormat('es-DO', {
     style: 'decimal',

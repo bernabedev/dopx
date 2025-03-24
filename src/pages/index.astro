@@ -202,17 +202,22 @@ const historyItems = historyRateResponse.data.result.items
 
 <script src='https://cdn.jsdelivr.net/npm/chart.js' is:inline></script>
 <script>
-  import type { HistoryItem } from '../definitios.d'
+  import type { CurrentRate, HistoryItem } from '../definitios.d'
   import { updateChart } from '../lib/chart'
-  import { formatDate, formatNumber } from '../lib/utils'
+  import { formatDate, formatLongDate, formatNumber } from '../lib/utils'
   const dataRate = JSON.parse(
     (document.querySelector('[data-rate]') as HTMLElement).dataset.rate!
   )
 
   // Datos actuales
-  const currentData = dataRate.currentRate
+  const currentData = dataRate.currentRate as CurrentRate
   // Datos históricos (ejemplo)
   let historicalData = dataRate.historyItems as HistoryItem[]
+
+  const updateDate = document.getElementById('update-date') as HTMLSpanElement
+  updateDate.textContent = formatLongDate(currentData.date)
+
+  console.log({ date: currentData.date })
 
   const $amount = document.getElementById('amount') as HTMLInputElement
   const $fromCurrency = document.getElementById(
