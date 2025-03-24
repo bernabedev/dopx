@@ -17,7 +17,7 @@ const currentRateResponse = await fetchCurrentRate()
 const historyRateResponse = await fetchHistoryRate()
 
 const currentRate = currentRateResponse.data.result
-const historyItems = historyRateResponse.data.result.items.reverse()
+const historyItems = historyRateResponse.data.result.items
 ---
 
 <Layout title='USD ↔ DOP | Tasa de Cambio'>
@@ -274,7 +274,7 @@ const historyItems = historyRateResponse.data.result.items.reverse()
   function updateHistoryTable(days: number) {
     $historyTableBody.innerHTML = ''
 
-    const lastDays = historicalData.slice(-days)
+    const lastDays = historicalData.slice(-days).reverse()
 
     lastDays.forEach((item) => {
       const row = document.createElement('tr')
